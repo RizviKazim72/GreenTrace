@@ -1,0 +1,23 @@
+# Production Profile
+spring:
+  # Database Configuration for Production
+  datasource:
+    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/greentrace_prod_db}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  
+  # JPA Configuration for Production
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    
+  # Production Server Configuration
+  server:
+    port: ${PORT:8080}
+  
+  # Production Logging
+  logging:
+    level:
+      com.greentrace.server: WARN
+      org.springframework.security: WARN

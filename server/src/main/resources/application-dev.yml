@@ -1,0 +1,25 @@
+# Development Profile
+spring:
+  # Database Configuration for Development
+  datasource:
+    url: jdbc:mysql://localhost:3306/greentrace_dev_db
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:password}
+  
+  # JPA Configuration for Development
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    
+  # Development Server Configuration
+  server:
+    port: 8080
+  
+  # Development Logging
+  logging:
+    level:
+      com.greentrace.server: DEBUG
+      org.springframework.web: DEBUG
+      org.hibernate.SQL: DEBUG
+      org.hibernate.type.descriptor.sql.BasicBinder: TRACE

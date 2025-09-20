@@ -1,5 +1,9 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
+/**
+ * Pricing card component with popular plan highlighting
+ */
 const PricingCard = ({ name, price, period, features, buttonText, buttonStyle, isPopular }) => {
   const cardClasses = isPopular 
     ? "bg-primary-600 text-white rounded-2xl p-8 relative transform scale-105 shadow-green-xl"
@@ -44,9 +48,12 @@ const PricingCard = ({ name, price, period, features, buttonText, buttonStyle, i
         ))}
       </ul>
       
-      <button className={buttonClasses}>
+      <Link 
+        to="/auth/signup" 
+        className={`${buttonClasses} block text-center`}
+      >
         {buttonText}
-      </button>
+      </Link>
     </div>
   )
 }

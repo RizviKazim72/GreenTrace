@@ -1,5 +1,8 @@
 import React from 'react'
 
+/**
+ * Statistics display card component
+ */
 const StatCard = ({ value, label }) => {
   return (
     <div>
