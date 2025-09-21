@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 import { 
   AuthLayout, 
   AuthInput, 
@@ -15,7 +16,7 @@ import {
   AUTH_MESSAGES 
 } from '../../constants'
 import { isValidEmail } from '../../utils'
-import axios from 'axios'
+import { useAuth } from '../../contexts/AuthContext'
 
 /**
  * Modern SignUp Page Component
@@ -23,7 +24,8 @@ import axios from 'axios'
  * Enhanced UX with loading states and smooth animations
  */
 const SignUpPage = () => {
-  const API_URL = import.meta.env.VITE_API_BASE_URL;
+  const navigate = useNavigate()
+  const { register, isLoading: authLoading } = useAuth()
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -184,45 +186,40 @@ const SignUpPage = () => {
 
     setIsLoading(true);
 
-    // Create signup promise for toast
-    const signupPromise = axios.post(`${API_URL}/auth/signup`, formData)
+    try {
+      // Use AuthContext register method
+      const result = await register(formData)
 
-    toast.promise(
-      signupPromise,
-      {
-        loading: 'Creating your account...',
-        success: (response) => {
-          // Clear form on success
-          setFormData({
-            firstName: '',
-            lastName: '',
-            email: '',
-            password: '',
-            confirmPassword: ''
-          })
-          setAcceptTerms(false)
-          setShowPasswordStrength(false)
-          return response.data.message || 'Account created successfully! Welcome to GreenTrace!'
-        },
-        error: (error) => {
-          console.error("Signup error:", error)
-          
-          if (error.response?.status === 409) {
-            return 'An account with this email already exists. Try logging in instead.'
-          } else if (error.response?.status >= 500) {
-            return 'Server error. Please try again later.'
-          } else if (error.code === 'ERR_NETWORK') {
-            return 'Network error. Please check your connection.'
-          } else {
-            return error.response?.data?.message || 'Something went wrong. Please try again.'
-          }
+      if (result.success) {
+        toast.success(result.message)
+        // Clear form on success
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          password: '',
+          confirmPassword: ''
+        })
+        setAcceptTerms(false)
+        setShowPasswordStrength(false)
+        
+        // Redirect to dashboard
+        setTimeout(() => {
+          navigate('/dashboard')
+        }, 1000)
+      } else {
+        if (result.errors) {
+          setErrors(result.errors)
         }
+        toast.error(result.message)
       }
-    ).finally(() => {
+    } catch (error) {
+      console.error("Signup error:", error)
+      toast.error('Something went wrong. Please try again.')
+    } finally {
       setIsLoading(false)
-    })
+    }
   }
-
 
   return (
     <>

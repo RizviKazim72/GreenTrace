@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 import { 
   AuthLayout, 
   AuthInput, 
@@ -14,7 +15,7 @@ import {
   AUTH_MESSAGES 
 } from '../../constants'
 import { isValidEmail } from '../../utils'
-import axios from 'axios'
+import { useAuth } from '../../contexts/AuthContext'
 
 /**
  * Modern Login Page Component
@@ -22,7 +23,8 @@ import axios from 'axios'
  * Improved UX with loading states and error handling
  */
 const LoginPage = () => {
-  const API_URL = import.meta.env.VITE_API_BASE_URL;
+  const navigate = useNavigate()
+  const { login, isLoading: authLoading } = useAuth()
 
   const [formData, setFormData] = useState({
     email: '',
@@ -138,45 +140,32 @@ const LoginPage = () => {
 
     setIsLoading(true);
 
-    // Create login promise for toast
-    const loginPromise = axios.post(`${API_URL}/auth/login`, formData)
+    try {
+      // Use AuthContext login method
+      const result = await login(formData.email, formData.password)
 
-    toast.promise(
-      loginPromise,
-      {
-        loading: 'Signing you in...',
-        success: (response) => {
-          // Clear form on success
-          setFormData({
-            email: '',
-            password: ''
-          })
-          setRememberMe(false)
-          
-          // Simulate redirect - replace with actual routing
-          setTimeout(() => {
-            toast.success('Redirecting to dashboard...')
-          }, 1000)
-          
-          return response.data.message || 'Welcome back! Login successful.'
-        },
-        error: (error) => {
-          console.error("Login error:", error)
-          
-          if (error.response?.status === 401) {
-            return 'Invalid email or password. Please check your credentials.'
-          } else if (error.response?.status >= 500) {
-            return 'Server error. Please try again later.'
-          } else if (error.code === 'ERR_NETWORK') {
-            return 'Network error. Please check your connection.'
-          } else {
-            return error.response?.data?.message || 'Something went wrong. Please try again.'
-          }
-        }
+      if (result.success) {
+        toast.success(result.message)
+        // Clear form on success
+        setFormData({
+          email: '',
+          password: ''
+        })
+        setRememberMe(false)
+        
+        // Redirect to dashboard
+        setTimeout(() => {
+          navigate('/dashboard')
+        }, 1000)
+      } else {
+        toast.error(result.message)
       }
-    ).finally(() => {
+    } catch (error) {
+      console.error("Login error:", error)
+      toast.error('Something went wrong. Please try again.')
+    } finally {
       setIsLoading(false)
-    })
+    }
   }
 
   return (
